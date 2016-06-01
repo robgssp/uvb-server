@@ -14,21 +14,26 @@ ifeq ($(CC),clang)
 	CFLAGS += -Weverything
 endif
 
-SOURCE := $(wildcard src/*.c)
+LIBSOURCE := $(addprefix src/,buffer.c counter.c http.c list.c lmdb_counter.c timers.c)
+SOURCE := $(LIBSOURCE) src/server.c
+CTRSOURCE := $(LIBSOURCE) src/countertest.c
 
 EXECUTABLE := uvb-server
 
-all:
+all: $(SOURCE)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -o $(EXECUTABLE) $(SOURCE)
 
-debug:
+debug: $(SOURCE)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUGFLAGS) -o $(EXECUTABLE) $(SOURCE)
 
-profile:
+profile: $(SOURCE)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -DGPROF $(DEBUGFLAGS) -pg -o $(EXECUTABLE) $(SOURCE)
 
-release:
+release: $(SOURCE)
 	$(CC) $(CPPFLAGS) $(CFLAGS) $(DEBUGFLAGS) -O2 -o $(EXECUTABLE) $(SOURCE)
+
+countertest: $(CTRSOURCE)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -ggdb -o countertest $(CTRSOURCE)
 
 
 install:
@@ -39,4 +44,3 @@ clean:
 
 uninstall:
 	$(RM) $(PREFIX)/bin/$(EXECUTABLE)
-
